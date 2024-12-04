@@ -1,7 +1,10 @@
 package pass
 
 import (
+	"bufio"
+	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -41,5 +44,27 @@ func GeneratePassword(length int, special, letters, nus bool) (password string) 
 }
 
 func CreatePassword(location string, multi bool) bool {
-
+	word := ""
+	if multi {
+		scanner := bufio.NewScanner(os.Stdin)
+		fmt.Println("Enter your password (press Ctrl+D or Ctrl+Z to end): ")
+		for scanner.Scan() {
+			word += scanner.Text() + "\n"
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Error when getting multiline password, error message: ", err)
+			return false
+		}
+	} else {
+		fmt.Print("Enter your password: ")
+		var input string
+		_, err := fmt.Scan(&input)
+		if err != nil {
+			fmt.Println("Error when getting password, error message: ", err)
+			return false
+		}
+		word += input
+	}
+	SaveNewPassword(location, word)
+	return true
 }

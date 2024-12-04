@@ -2,14 +2,14 @@ package pass
 
 import (
 	"fmt"
-	"log"
 	"os"
 )
 
 func checkHushStore() bool {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Could not create a hush_store directory.")
+		return false
 	}
 	dir := homeDir + "/.hush_store"
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -31,4 +31,8 @@ func ShowPasswords() {
 	} else {
 		fmt.Println("Could not find the hush_store folder or create one.")
 	}
+}
+
+func SaveNewPassword(location, word string) bool {
+
 }

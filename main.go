@@ -21,8 +21,8 @@ func main() {
 			// TODO: perform all necessary validations on
 			// the input including ensuring file doesnt exist
 			// yet and it is a valid folder/filename
+			insertCmd.Parse(os.Args[3:])
 			I.CreatePassword(os.Args[2], *insertMulti)
 		}
-		I.CreatePassword()
 	}
 }
