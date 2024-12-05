@@ -18,16 +18,16 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func GeneratePassword(length int, special, letters, nus bool) (password string) {
+func GeneratePassword(location string, length int, special, letters, nus bool) bool {
 	pw := make([]byte, length)
 	var types []int
-	if special {
+	if !special {
 		types = append(types, 0)
 	}
-	if letters {
+	if !letters {
 		types = append(types, 1)
 	}
-	if nus {
+	if !nus {
 		types = append(types, 2)
 	}
 	for i := range pw {
@@ -40,7 +40,7 @@ func GeneratePassword(length int, special, letters, nus bool) (password string) 
 			pw[i] = numBytes[rand.Intn(len(numBytes))]
 		}
 	}
-	return string(pw)
+	return SaveNewPassword(location, string(pw))
 }
 
 func CreatePassword(location string, multi bool) bool {
@@ -67,4 +67,27 @@ func CreatePassword(location string, multi bool) bool {
 	}
 	SaveNewPassword(location, word)
 	return true
+}
+
+func createSuperUser() bool {
+	pword := ""
+	uname := ""
+	fmt.Print("Enter your username: ")
+	var u_put string
+	_, err := fmt.Scan(&u_put)
+	if err != nil {
+		fmt.Println("Error when getting username, error message: ", err)
+		return false
+	}
+	uname += u_put
+
+	fmt.Print("Enter your password: ")
+	var p_put string
+	_, e := fmt.Scan(&p_put)
+	if e != nil {
+		fmt.Println("Error when getting password, error message: ", e)
+		return false
+	}
+	pword += p_put
+	return saveSuperUser(uname, pword)
 }
