@@ -21,34 +21,42 @@ func main() {
 	noNumbers := generateCmd.Bool("nn", false, "Use this flag if you dont want numbers in your password")
 
 	//removeCmd := flag.NewFlagSet("rm", flag.ExitOnError)
-
-	switch os.Args[1] {
-	case "insert":
-		if len(os.Args) < 3 {
-			fmt.Println("To use this command you need to enter the name of the folder/file where you want to name this password.")
-		} else {
-			// TODO: perform all necessary validations on
-			// the input including ensuring file doesnt exist
-			// yet and it is a valid folder/filename
-			insertCmd.Parse(os.Args[3:])
-			I.CreatePassword(os.Args[2], *insertMulti)
-		}
-	case "generate":
-
-		if len(os.Args) < 4 {
-			fmt.Println("To use this command you need to enter the name of the folder/file where you want to name this password.")
-		} else {
-			// TODO: perform all necessary validations on
-			generateCmd.Parse(os.Args[4:])
-			plen, err := strconv.Atoi(os.Args[3])
-			if err != nil {
-				fmt.Println("Please enter an integer to be the length of the password")
+	if len(os.Args) == 1 {
+		I.ShowPasswords()
+	} else if len(os.Args) == 2 {
+		I.ShowOnePassword(os.Args[1])
+	} else {
+		switch os.Args[1] {
+		case "insert":
+			if len(os.Args) < 3 {
+				fmt.Println("To use this command you need to enter the name of the folder/file where you want to name this password.")
 			} else {
-				I.GeneratePassword(os.Args[2], plen, *noSymbols, *noLetters, *noNumbers)
+				// TODO: perform all necessary validations on
+				// the input including ensuring file doesnt exist
+				// yet and it is a valid folder/filename
+				insertCmd.Parse(os.Args[3:])
+				I.CreatePassword(os.Args[2], *insertMulti)
 			}
-		}
+		case "generate":
 
-	case "rm":
-		I.RemovePassword(os.Args[2])
+			if len(os.Args) < 4 {
+				fmt.Println("To use this command you need to enter the name of the folder/file where you want to name this password.")
+			} else {
+				// TODO: perform all necessary validations on
+				generateCmd.Parse(os.Args[4:])
+				plen, err := strconv.Atoi(os.Args[3])
+				if err != nil {
+					fmt.Println("Please enter an integer to be the length of the password")
+				} else {
+					I.GeneratePassword(os.Args[2], plen, *noSymbols, *noLetters, *noNumbers)
+				}
+			}
+
+		case "delete":
+			I.RemovePassword(os.Args[2])
+
+		default:
+			fmt.Println("Please enter a legitimate command to use this program, use the -h flag to get help and details on all that you can do.")
+		}
 	}
 }

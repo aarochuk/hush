@@ -90,12 +90,83 @@ func saveSuperUser(username, password string) bool {
 }
 
 func ShowPasswords() {
-	valid := dbInit()
-	if valid {
-		// TODO: Create a way to display all the passwords once you have passwords in the store
-		fmt.Println("temporary holder")
+	if dbInit() {
+
+		homeDir, err := os.UserHomeDir()
+		dir := homeDir + "/.hush/.passwords"
+		db, err = sql.Open("sqlite3", dir)
+		if err != nil {
+			fmt.Println("Could not open passwords database")
+		}
+		defer db.Close()
+		rows, err := db.Query("SELECT * FROM passwords")
+		if err != nil {
+			fmt.Println("Error querying database")
+			return
+		}
+		defer rows.Close()
+		data := []Pass{}
+		for rows.Next() {
+			var pass Pass
+			if err := rows.Scan(&pass.ID, &pass.Name, &pass.Username, &pass.Password); err != nil {
+				fmt.Println("Unable to get data from database")
+				return
+			}
+			data = append(data, pass)
+		}
+		if len(data) == 0 {
+			fmt.Println("The database is empty right now.")
+		} else {
+			fmt.Printf("%20s|%20s|%20s\n", "Password Name", "Username", "Password")
+			bottom_pipes := strings.Repeat("_", 65)
+			fmt.Printf("%65s\n", bottom_pipes)
+			for _, passw := range data {
+				fmt.Printf("%20s|%20s|%20s\n", passw.Name, passw.Username, passw.Password)
+			}
+		}
 	} else {
-		fmt.Println("Could not find the hush_store folder or create one.")
+		fmt.Println("Database was not initialized and could not be initialized")
+		return
+	}
+}
+
+func ShowOnePassword(location string) {
+
+	if dbInit() {
+		homeDir, err := os.UserHomeDir()
+		dir := homeDir + "/.hush/.passwords"
+		db, err = sql.Open("sqlite3", dir)
+		if err != nil {
+			fmt.Println("Could not open passwords database")
+		}
+		defer db.Close()
+		str := strings.Split(location, "/")
+		pname := str[0]
+		username := str[1]
+		rows, err := db.Query("SELECT id, pName, username, password FROM passwords WHERE pName=? AND username=?", pname, username)
+		if err != nil {
+			fmt.Println("Error searching for password in database")
+			return
+		}
+		defer rows.Close()
+		data := []Pass{}
+		for rows.Next() {
+			var pass Pass
+			if err := rows.Scan(&pass.ID, &pass.Name, &pass.Username, &pass.Password); err != nil {
+				fmt.Println("Unable to get data from database")
+				return
+			}
+			data = append(data, pass)
+		}
+
+		if len(data) == 0 {
+			fmt.Println("The password you were looking for did not exist.")
+		} else {
+			fmt.Printf("The password to %s is %s", location, data[0].Password)
+		}
+	} else {
+		fmt.Println("Database was not initialized and could not be initialized")
+		return
 	}
 }
 
