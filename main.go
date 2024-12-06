@@ -19,6 +19,9 @@ func main() {
 	noSymbols := generateCmd.Bool("ns", false, "Use this flag if you dont want symbols in your password")
 	noLetters := generateCmd.Bool("nl", false, "Use this flag if you dont want letters in your password")
 	noNumbers := generateCmd.Bool("nn", false, "Use this flag if you dont want numbers in your password")
+
+	//removeCmd := flag.NewFlagSet("rm", flag.ExitOnError)
+
 	switch os.Args[1] {
 	case "insert":
 		if len(os.Args) < 3 {
@@ -44,5 +47,8 @@ func main() {
 				I.GeneratePassword(os.Args[2], plen, *noSymbols, *noLetters, *noNumbers)
 			}
 		}
+
+	case "rm":
+		I.RemovePassword(os.Args[2])
 	}
 }

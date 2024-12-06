@@ -112,13 +112,68 @@ func SaveNewPassword(location, word string) bool {
 		str := strings.Split(location, "/")
 		pname := str[0]
 		username := str[1]
-		fmt.Println(username)
 		_, e := db.Exec("INSERT INTO passwords(pName, username, password) VALUES(?, ?, ?);", pname, username, word)
 		if e != nil {
 			fmt.Println("Error when adding password, ", err)
 			return false
 		}
 		fmt.Println("Successfully added password for", location)
+	} else {
+		fmt.Println("Sorry your database was not initialized and could not be initialized, please try again later.")
+		return false
+	}
+	return true
+}
+
+func RemovePassword(location string) bool {
+	// TODO: work on this
+	if dbInit() {
+		homeDir, err := os.UserHomeDir()
+		dir := homeDir + "/.hush/.passwords"
+		db, err = sql.Open("sqlite3", dir)
+		if err != nil {
+			fmt.Println("Could not open passwords database")
+		}
+		defer db.Close()
+		str := strings.Split(location, "/")
+		pname := str[0]
+		//username := str[1]
+
+		fmt.Print("Are you sure you want to delete your password (y/n): ")
+		var input string
+		_, er := fmt.Scan(&input)
+		if er != nil {
+			fmt.Println("Could not get input to whether you wanted your password deleted", err)
+			return false
+		}
+		if input == "y" {
+			rows, err := db.Query("SELECT id, pName, username, password FROM passwords WHERE pName=?", pname)
+			if err != nil {
+				fmt.Println("Error searching for password in database")
+				return false
+			}
+			defer rows.Close()
+			data := []Pass{}
+			for rows.Next() {
+				var pass Pass
+				if err := rows.Scan(&pass.ID, &pass.Name, &pass.Username, &pass.Password); err != nil {
+					fmt.Println("Unable to get data from database")
+					return false
+				}
+				data = append(data, pass)
+			}
+			if len(data) > 0 {
+				_, err := db.Exec("DELETE FROM passwords WHERE pName = ?", pname)
+				if err != nil {
+					fmt.Println("Error deleting password from database")
+					return false
+				} else {
+					fmt.Println("Successfully deleted password from database")
+				}
+			} else {
+				fmt.Println("The Name/Username you just entered does not exist in the database.")
+			}
+		}
 	} else {
 		fmt.Println("Sorry your database was not initialized and could not be initialized, please try again later.")
 		return false
