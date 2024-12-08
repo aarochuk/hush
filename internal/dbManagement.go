@@ -131,7 +131,6 @@ func ShowPasswords() {
 }
 
 func ShowOnePassword(location string) {
-
 	if dbInit() {
 		homeDir, err := os.UserHomeDir()
 		dir := homeDir + "/.hush/.passwords"
@@ -171,7 +170,6 @@ func ShowOnePassword(location string) {
 }
 
 func SaveNewPassword(location, word string) bool {
-	// TODO: work on this
 	if dbInit() {
 		homeDir, err := os.UserHomeDir()
 		dir := homeDir + "/.hush/.passwords"
@@ -183,6 +181,27 @@ func SaveNewPassword(location, word string) bool {
 		str := strings.Split(location, "/")
 		pname := str[0]
 		username := str[1]
+
+		rows, err := db.Query("SELECT id, pName, username, password FROM passwords WHERE pName=?", pname)
+		if err != nil {
+			fmt.Println("Error searching for password in database")
+			return false
+		}
+		defer rows.Close()
+		data := []Pass{}
+		for rows.Next() {
+			var pass Pass
+			if err := rows.Scan(&pass.ID, &pass.Name, &pass.Username, &pass.Password); err != nil {
+				fmt.Println("Unable to get data from database")
+				return false
+			}
+			data = append(data, pass)
+		}
+
+		if len(data) != 0 {
+			fmt.Println("The password name already exist in the database sorry either edit the password or create a password with a unique name.")
+			return false
+		}
 		_, e := db.Exec("INSERT INTO passwords(pName, username, password) VALUES(?, ?, ?);", pname, username, word)
 		if e != nil {
 			fmt.Println("Error when adding password, ", err)
@@ -247,6 +266,51 @@ func RemovePassword(location string) bool {
 		}
 	} else {
 		fmt.Println("Sorry your database was not initialized and could not be initialized, please try again later.")
+		return false
+	}
+	return true
+}
+
+func EditPassword(location, pw string) bool {
+	if dbInit() {
+		homeDir, err := os.UserHomeDir()
+		dir := homeDir + "/.hush/.passwords"
+		db, err = sql.Open("sqlite3", dir)
+		if err != nil {
+			fmt.Println("Could not open passwords database")
+		}
+		defer db.Close()
+		str := strings.Split(location, "/")
+		pname := str[0]
+		username := str[1]
+		rows, err := db.Query("SELECT id, pName, username, password FROM passwords WHERE pName=? AND username=?", pname, username)
+		if err != nil {
+			fmt.Println("Error searching for password in database")
+			return false
+		}
+		defer rows.Close()
+		data := []Pass{}
+		for rows.Next() {
+			var pass Pass
+			if err := rows.Scan(&pass.ID, &pass.Name, &pass.Username, &pass.Password); err != nil {
+				fmt.Println("Unable to get data from database")
+				return false
+			}
+			data = append(data, pass)
+		}
+
+		if len(data) == 0 {
+			fmt.Println("The password you wanted to edit does not exist.")
+		} else {
+			_, err := db.Exec("UPDATE passwords SET password = ? WHERE pName = ? AND username = ?", pw, pname, username)
+			if err != nil {
+				fmt.Println("Could not update password in database, please try again later")
+				return false
+			}
+			fmt.Printf("Successfully updated password for %s", location)
+		}
+	} else {
+		fmt.Println("Database was not initialized and could not be initialized")
 		return false
 	}
 	return true

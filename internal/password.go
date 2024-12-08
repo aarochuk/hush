@@ -18,7 +18,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func GeneratePassword(location string, length int, special, letters, nus bool) bool {
+func GeneratePassword(location string, length int, special, letters, nus, edit bool) bool {
 	pw := make([]byte, length)
 	var types []int
 	if !special {
@@ -40,10 +40,13 @@ func GeneratePassword(location string, length int, special, letters, nus bool) b
 			pw[i] = numBytes[rand.Intn(len(numBytes))]
 		}
 	}
+	if edit {
+		return EditPassword(location, string(pw))
+	}
 	return SaveNewPassword(location, string(pw))
 }
 
-func CreatePassword(location string, multi bool) bool {
+func CreatePassword(location string, multi, edit bool) bool {
 	word := ""
 	if multi {
 		scanner := bufio.NewScanner(os.Stdin)
@@ -65,8 +68,11 @@ func CreatePassword(location string, multi bool) bool {
 		}
 		word += input
 	}
-	SaveNewPassword(location, word)
-	return true
+	if edit {
+		return EditPassword(location, word)
+	} else {
+		return SaveNewPassword(location, word)
+	}
 }
 
 func createSuperUser() bool {
