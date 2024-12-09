@@ -2,15 +2,108 @@
 <html>
     <head>
         <title>hush</title>
+        <link rel="stylesheet" href="index.css">
     </head>
     <body>
         <div class="top-banner">
             <h1>hush</h1>
-            <h2>a unix password manager made with go</h2>
+            <div class="top-icons">
+                <a href="#install"><img src="images/download.png"/></a>
+                <a href="https://github.com/aarochuk/hush" target="_blank"><img src="images/github.png"/></a>
+            </div>
         </div>
         <div class="main">
-            <p>Still under construction check again later</p>
+            <div id="intro">
+                <h1>What is hush?</h1>
+                <p>Hush is a simple password manager for unix based devices. It was inspired by <a href="https://www.passwordstore.org/" target="_blank">pass</a>. In all honesty I made it to practice programming in golang, this is my first project in golang excluding solving some questions from advent of code 2015 (the first two days and the first part of day 3).</p>
+                <p>Passwords are stored in a .hush folder in the users home directory. In specific an sqlite3 database, passwords, is created in the .hush directory. Passwords are stored in the passwords table in the passwords database which is in the .hush folder.</p>
+                <p>Although this project was inspired by pass, it does not use gpg encrypted files to store passwords, and it lacks other features like using git for version control on the stored passwords, which is honestly a genius idea but since I am not using files to store the seperate passwords I did not really see the point.</p>
+                <p>If you really want a password manager for your unix based device please use pass or one of its clients for other platforms, pass has a community of contributers and some extensions of pass even have encryption, something that hush lacks (but honestly shouldn't I was just lazy - might add it later). This was just a project for learning not use, even I don't use this so please don't either.</p>
+            </div>
+        <div id="use">
+            <h1>Using hush</h1>
+            <p>We can list all the existing passwords in the database:</p>
+            <div class="example">
+            <pre>
+aarochuk@laptop ~ $ ./hush
+Password Name|            Username|            Password         
+_______________________________________________________   
+         Bank|           WorldBank|              hfkrwf                  
+        Email|          WorldEmail|       %o34Kf8{`]w30        
+        Phone|          WorldPhone|        ^0p!Hy637p14
+            </pre>
+
+            </div>
+            <p>We can show individual passwords by searching for the passwordName/userName</p>
+            <div class="example">
+            <pre>
+aarochuk@laptop ~ $ ./hush Bank/WorldBank 
+The password to Bank/WorldBank is hfkrwf
+            </pre>
+            </div>
+            <p>We can create a password by using insert, every password must have a password name but mustn't have a username, the format is always PasswordName/UserName, if there is no username the format is PasswordName/</p>
+            <div class="example">
+<pre>
+./hush insert School/WorldSchool
+Enter your password: helloschool
+Successfully added password for School/WorldSchool
+</pre>
+            </div>
+            <p>You can create multiline passwords by using the -m flag</p>
+            <div class="example">
+<pre>
+./hush insert Work/Software -m 
+Enter your password (press Ctrl+D or Ctrl+Z to end):
+This
+Is A Multiline
+Password
+Successfully added password for Work/Software
+</pre>
+            </div>
+            <p>You can generate a password by using the generate command (original I know). When using the generate command, you have to specify the length of the password you want to be generated. In addition, there are flags that allow you to specify if you dont want numbers, letters or symbols in your password. If you dont want numbers in your password use the -nn flag, for no symbols use the -ns flag and for no letters use the -nl flag.</p>
+            <div class="example">
+<pre>
+./hush generate MySpace/Profile 15 -ns
+Successfully added password for MySpace/Profile
+</pre>
+            </div>
+            <p>You can edit a password by using edit in which case you have to enter the password.</p>
+            <div class="example">
+<pre>
+./hush edit MySpace/Profile
+Enter your password: NewPassword
+Successfully updated password for MySpace/Profile
+</pre>
+            </div>
+            <p>To use password generation for an edited password use the -g flag. In which case you have to specify the length and any of the other password generation flags still apply.</p>
+            <div class="example">
+<pre>
+./hush edit MySpace/Profile -g 10
+Successfully updated password for MySpace/Profile
+</pre>
+            </div>
+            <p>You can delete a password by using the remove command and you just specify the PasswordName/UserName to delete the password.</p>
+            <div class="example">
+<pre>
+./hush delete School/WorldSchool
+Are you sure you want to delete your password (y/n): y
+Successfully deleted password from database
+</pre>
+            </div>
         </div>
-        <footer></footer>
+        
+        <div id="install">
+            <h1>Installation</h1>
+            <p>Really I could have generated the executable binary and provided it directly for download, but, for no reason at all you would have to get go working on your computer yourself and use go build to get the executable binary. Did I do this to discourage use? Na, I was just lazy tbh. Just clone the repo (the link is at the top of the page - click on the github icon), then run</p>
+            <div class="example">
+<pre>
+go build hush.go
+</pre>
+            </div>
+        </div>
+       </div> 
+        <footer>
+            <p>Made by <a href="https://github.com/aarochuk" target="_blank" class="gh-name">aarochuk</a>, 2024</p>
+        </footer>
     </body>
 </html>
